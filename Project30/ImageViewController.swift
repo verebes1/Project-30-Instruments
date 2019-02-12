@@ -9,7 +9,7 @@
 import UIKit
 
 class ImageViewController: UIViewController {
-	var owner: SelectionViewController!
+	weak var owner: SelectionViewController!
 	var image: String!
 	var animTimer: Timer!
 
@@ -49,7 +49,8 @@ class ImageViewController: UIViewController {
         super.viewDidLoad()
 
 		title = image.replacingOccurrences(of: "-Large.jpg", with: "")
-		let original = UIImage(named: image)!
+        let path = Bundle.main.path(forResource: image, ofType: nil)!
+		let original = UIImage(contentsOfFile: path)!
 
 		let renderer = UIGraphicsImageRenderer(size: original.size)
 
@@ -62,13 +63,19 @@ class ImageViewController: UIViewController {
 
 		imageView.image = rounded
     }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        //By invalidating the timer before the imageViewController dissappears we break the strong cycle it holds
+        animTimer.invalidate()
+    }
 
 	override func viewDidAppear(_ animated: Bool) {
 		super.viewDidAppear(animated)
 
 		imageView.alpha = 0
 
-		UIView.animate(withDuration: 3) { [unowned self] in
+        UIView.animate(withDuration: 3) { [unowned self] in
 			self.imageView.alpha = 1
 		}
 	}

@@ -10,7 +10,6 @@ import UIKit
 
 class SelectionViewController: UITableViewController {
 	var items = [String]() // this is the array that will store the filenames to load
-	var viewControllers = [UIViewController]() // create a cache of the detail view controllers for faster loading
 	var dirty = false
 
     override func viewDidLoad() {
@@ -20,6 +19,7 @@ class SelectionViewController: UITableViewController {
 
 		tableView.rowHeight = 90
 		tableView.separatorStyle = .none
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
 
 		// load all the JPEGs into our array
 		let fm = FileManager.default
@@ -56,8 +56,8 @@ class SelectionViewController: UITableViewController {
 
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-		let cell = UITableViewCell(style: .default, reuseIdentifier: "Cell")
-
+		let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+        
 		// find the image for this cell, and load its thumbnail
 		let currentImage = items[indexPath.row % items.count]
 		let imageRootName = currentImage.replacingOccurrences(of: "Large", with: "Thumb")
@@ -68,11 +68,6 @@ class SelectionViewController: UITableViewController {
 		let renderer = UIGraphicsImageRenderer(size: renderRect.size)
 
 		let rounded = renderer.image { ctx in
-            //Optimization by adding the shadow here
-//            ctx.cgContext.setShadow(offset: CGSize.zero, blur: 200, color: UIColor.black.cgColor)
-//            ctx.cgContext.fillEllipse(in: CGRect(origin: CGPoint.zero, size: original.size))
-//            ctx.cgContext.setShadow(offset: CGSize.zero, blur: 0, color: nil)
-            
 			ctx.cgContext.addEllipse(in: renderRect)
 			ctx.cgContext.clip()
 
@@ -82,11 +77,11 @@ class SelectionViewController: UITableViewController {
 		cell.imageView?.image = rounded
 
 		// give the images a nice shadow to make them look a bit more dramatic
-        //This is removed by the optimization above
-//        cell.imageView?.layer.shadowColor = UIColor.black.cgColor
-//        cell.imageView?.layer.shadowOpacity = 1
-//        cell.imageView?.layer.shadowRadius = 10
-//        cell.imageView?.layer.shadowOffset = CGSize.zero
+        cell.imageView?.layer.shadowColor = UIColor.black.cgColor
+        cell.imageView?.layer.shadowOpacity = 1
+        cell.imageView?.layer.shadowRadius = 10
+        cell.imageView?.layer.shadowOffset = CGSize.zero
+        cell.imageView?.layer.shadowPath = UIBezierPath(ovalIn: CGRect(x: 0, y: 0, width: 90, height: 90)).cgPath
 
 		// each image stores how often it's been tapped
 		let defaults = UserDefaults.standard
@@ -104,7 +99,6 @@ class SelectionViewController: UITableViewController {
 		dirty = false
 
 		// add to our view controller cache and show
-		viewControllers.append(vc)
 		navigationController!.pushViewController(vc, animated: true)
 	}
 }
