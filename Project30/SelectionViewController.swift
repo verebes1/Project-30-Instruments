@@ -81,6 +81,7 @@ class SelectionViewController: UITableViewController {
 		cell.imageView?.image = rounded
 
 		// give the images a nice shadow to make them look a bit more dramatic
+        //This is removed by the optimization above
 //        cell.imageView?.layer.shadowColor = UIColor.black.cgColor
 //        cell.imageView?.layer.shadowOpacity = 1
 //        cell.imageView?.layer.shadowRadius = 10
